@@ -287,16 +287,6 @@ function drawLine(){
   }
 }
 
-function drawSquares(){
-  //draw small squares
-  for(let square of squares){
-    fill(square.color);
-    noStroke();
-    let animatedY = square.y+sin(frameCount * 0.1)*2;
-    rect(square.x+mondrian.xOffset,animatedY+mondrian.yOffset,rectSize/2);
-  }
-}
-
 function generateSquares(){
   //Calculate cross points with new color, the cross points are the 
   //intersection of the horizontal and vertical lines
@@ -307,7 +297,7 @@ function generateSquares(){
         let randomColor = random([color(173,57,42),   //red
                                   color(67,103,187),    //blue
                                   color(200, 200, 200)]);  //grey
-        squares.push({x:vertical.x,y:horizontal.y,color:randomColor});
+        squares.push({x:vertical.x,y:horizontal.y,color:randomColor,noiseOffset:random(1000)});
       }
     }
   }
@@ -320,7 +310,7 @@ function generateSquares(){
                                   color(173,57,42), //red
                                   color(67,103,187), //blue
                                   color(200, 200, 200)]); //grey
-        squares.push({x:vertical.x,y:i.y,color:randomColor});
+        squares.push({x:vertical.x,y:i.y,color:randomColor,noiseOffset:random(1000)});
       }
     }
   }
@@ -334,11 +324,30 @@ function generateSquares(){
                                     color(173,57,42), //red
                                     color(67,103,187), //blue
                                     color(200, 200, 200)]); //grey
-        squares.push({x:i,y:horizontal.y,color:randomColor});
+        squares.push({x:i,y:horizontal.y,color:randomColor,noiseOffset:random(1000)});
       }
     }
   }
 }
+function drawSquares(){
+  //draw small squares
+  for(let square of squares){
+    fill(square.color);
+    noStroke();
+
+    let noiseX=noise(square.noiseOffset+frameCount*0.01)*50-25;
+    let noiseY=noise(square.noiseOffset+1000+frameCount*0.01)*50-25;
+
+    push();
+    translate(square.x+mondrian.xOffset+noiseX,square.y+mondrian.yOffset+noiseY);
+    rect(0,0,rectSize/2,rectSize/2);
+    pop();
+    //let animatedY = square.y+sin(frameCount * 0.1)*2;
+    //rect(square.x+mondrian.xOffset,animatedY+mondrian.yOffset,rectSize/2);
+  }
+}
+
+
 
 function windowResized(){
   resizeCanvas(windowWidth, windowHeight);
