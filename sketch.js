@@ -17,27 +17,16 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
   background(255, 250, 240); //Floralwhite
   calculateMondrian();
-  noLoop(); //make the draw function only run once
-}
-
-function draw() {
-  drawGrid();
+  //noLoop(); //make the draw function only run once
   drawLine(); // draw line first
+  drawSquares();
   drawRectangle();
 }
 
-function drawGrid(){
-  //rectangle layout
-  //This divides the whole canvas into grids, so that the specific grid
-  //can be filled with color.
-  for (let y = 0; y < mondrian.height; y += rectSize){
-    for (let x = 0; x < mondrian.width; x += rectSize){
-      fill(255, 250, 240);
-      noStroke(); //remove the outline of the grids
-      square(x + mondrian.xOffset, y + mondrian.yOffset, rectSize);
-    }
-  }
+function draw() {
+
 }
+
 
 function drawRectangle() {
   let rectangles = []; // Array to store generated rectangles
@@ -273,20 +262,6 @@ function drawLine(){
     //store the y and h values in the array, so the cross points can be 
     //drawn later
     horizontalLines.push({y: y, h: h, x: 0, w: mondrian.width});
-
-    //Add random colored squares along the horizontal line to mimic 
-    //Mondrian painting
-    for (let i = rectSize; i < mondrian.width; i += rectSize){
-      if(random() > 0.5){ //Randomly decide to place a colored square
-        let randomColor = random([color(238,216,34), //yellow
-                                  color(173,57,42), //red
-                                  color(67,103,187), //blue
-                                  color(200, 200, 200)]); //grey
-        fill(randomColor);
-        noStroke();
-        square(i + mondrian.xOffset, y + mondrian.yOffset, rectSize/2);
-      }
-    }
   }
 
   //Draw Vertical lines
@@ -304,21 +279,10 @@ function drawLine(){
     
     //store the x and w values in the array
     verticalLines.push({x: x, w: w, y: 0, h: mondrian.height});
-  
-    //Add random colored squares along the vertical line
-    for (let i = rectSize; i < mondrian.height; i += rectSize){
-      if(random() > 0.5){
-        let randomColor = random([color(238,216,34), //yellow
-                                  color(173,57,42), //red
-                                  color(67,103,187), //blue
-                                  color(200, 200, 200)]); //grey
-        fill(randomColor);
-        noStroke();
-        square(x + mondrian.xOffset, i + mondrian.yOffset, rectSize/2);
-      }
-    }
   }
+}
 
+function drawSquares(){
   //Draw cross points with new color, the cross points are the 
   //intersection of the horizontal and vertical lines
   for (let horizontal of horizontalLines){ 
@@ -335,8 +299,37 @@ function drawLine(){
       }
     }
   }
-}
+  //Add random colored squares along the vertical line
+  for(let vertical of verticalLines){
+    for (let i = rectSize; i < mondrian.height; i += rectSize){
+      if(random() > 0.5){
+        let randomColor = random([color(238,216,34), //yellow
+                                  color(173,57,42), //red
+                                  color(67,103,187), //blue
+                                  color(200, 200, 200)]); //grey
+        fill(randomColor);
+        noStroke();
+        square(vertical.x + mondrian.xOffset, i + mondrian.yOffset, rectSize/2);
+      }
+    }
+  }
 
+  //Add random colored squares along the horizontal line to mimic 
+  //Mondrian painting
+  for(let horizontal of horizontalLines){
+    for (let i = rectSize; i < mondrian.width; i += rectSize){
+      if(random() > 0.5){ //Randomly decide to place a colored square
+        let randomColor = random([color(238,216,34), //yellow
+                                    color(173,57,42), //red
+                                    color(67,103,187), //blue
+                                    color(200, 200, 200)]); //grey
+        fill(randomColor);
+        noStroke();
+        square(i + mondrian.xOffset, horizontal.y + mondrian.yOffset, rectSize/2);
+      }
+    }
+  }
+}
 
 function windowResized(){
   resizeCanvas(windowWidth, windowHeight);
