@@ -12,19 +12,22 @@ let canvasAspectRatio = 0;
 //Make two arrays to store the horizontal and vertical lines
 let horizontalLines = [];
 let verticalLines = [];
+let squares=[];
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
   background(255, 250, 240); //Floralwhite
   calculateMondrian();
   //noLoop(); //make the draw function only run once
-  drawLine(); // draw line first
-  drawSquares();
+  generateLine();
+
+  generateSquares();
   drawRectangle();
 }
 
 function draw() {
-
+  drawLine(); // draw line first
+  drawSquares();
 }
 
 
@@ -236,16 +239,15 @@ function drawRectangle() {
   }
 }
 
+function generateLine(){
+   //Make two arrays to store the horizontal and vertical lines
+   horizontalLines = [];
+   verticalLines = [];
+ //The starting point coordinates of Y, this is the position of the first horizontal line, and the subsequent vertical lines are arranged based on this.
+     let firstY=floor(random(0,2))*rectSize;
+     let firstX=floor(random(0,2))*rectSize;
 
-
-function drawLine(){
-  //Make two arrays to store the horizontal and vertical lines
-  horizontalLines = [];
-  verticalLines = [];
-//The starting point coordinates of Y, this is the position of the first horizontal line, and the subsequent vertical lines are arranged based on this.
-    let firstY=floor(random(0,2))*rectSize;
-    let firstX=floor(random(0,2))*rectSize;
-  //Draw Horizontal lines
+      //Draw Horizontal lines
   for (let i = 0; i < random(10,12); i ++){
     let y=firstY+floor(random(i,i*2))*rectSize+rectSize;
 
@@ -254,10 +256,6 @@ function drawLine(){
       y=mondrian.height
     }
     let h = rectSize/2;
-
-    fill(238,216,34);
-    noStroke();
-    rect(mondrian.xOffset, y + mondrian.yOffset, mondrian.width, h);
     
     //store the y and h values in the array, so the cross points can be 
     //drawn later
@@ -272,18 +270,35 @@ function drawLine(){
     }
 
     let w =  rectSize/2;
-
-    fill(238,216,34);
-    noStroke();
-    rect(x + mondrian.xOffset, mondrian.yOffset, w, mondrian.height);
     
     //store the x and w values in the array
     verticalLines.push({x: x, w: w, y: 0, h: mondrian.height});
   }
 }
 
+function drawLine(){
+  fill(238,216,34);
+  noStroke();
+  for(let line of horizontalLines){
+    rect(mondrian.xOffset,line.y + mondrian.yOffset, mondrian.width,line.h);
+  }
+  for(let line of verticalLines){
+    rect(line.x + mondrian.xOffset, mondrian.yOffset, line.w, mondrian.height);
+  }
+}
+
 function drawSquares(){
-  //Draw cross points with new color, the cross points are the 
+  //draw small squares
+  for(let square of squares){
+    fill(square.color);
+    noStroke();
+    let animatedY = square.y+sin(frameCount * 0.1)*2;
+    rect(square.x+mondrian.xOffset,animatedY+mondrian.yOffset,rectSize/2);
+  }
+}
+
+function generateSquares(){
+  //Calculate cross points with new color, the cross points are the 
   //intersection of the horizontal and vertical lines
   for (let horizontal of horizontalLines){ 
     for (let vertical of verticalLines){
@@ -292,13 +307,11 @@ function drawSquares(){
         let randomColor = random([color(173,57,42),   //red
                                   color(67,103,187),    //blue
                                   color(200, 200, 200)]);  //grey
-      
-        fill(randomColor);
-        square(vertical.x + mondrian.xOffset, 
-               horizontal.y + mondrian.yOffset, rectSize/2);
+        squares.push({x:vertical.x,y:horizontal.y,color:randomColor});
       }
     }
   }
+
   //Add random colored squares along the vertical line
   for(let vertical of verticalLines){
     for (let i = rectSize; i < mondrian.height; i += rectSize){
@@ -307,14 +320,12 @@ function drawSquares(){
                                   color(173,57,42), //red
                                   color(67,103,187), //blue
                                   color(200, 200, 200)]); //grey
-        fill(randomColor);
-        noStroke();
-        square(vertical.x + mondrian.xOffset, i + mondrian.yOffset, rectSize/2);
+        squares.push({x:vertical.x,y:i.y,color:randomColor});
       }
     }
   }
 
-  //Add random colored squares along the horizontal line to mimic 
+   //Add random colored squares along the horizontal line to mimic 
   //Mondrian painting
   for(let horizontal of horizontalLines){
     for (let i = rectSize; i < mondrian.width; i += rectSize){
@@ -323,9 +334,7 @@ function drawSquares(){
                                     color(173,57,42), //red
                                     color(67,103,187), //blue
                                     color(200, 200, 200)]); //grey
-        fill(randomColor);
-        noStroke();
-        square(i + mondrian.xOffset, horizontal.y + mondrian.yOffset, rectSize/2);
+        squares.push({x:i,y:horizontal.y,color:randomColor});
       }
     }
   }
@@ -335,13 +344,13 @@ function windowResized(){
   resizeCanvas(windowWidth, windowHeight);
   background(255, 250, 240);
   calculateMondrian(); 
-  draw();
+  setup();
 }
 function windowResized(){
   resizeCanvas(windowWidth, windowHeight);
   background(255, 250, 240);
   calculateMondrian(); 
-  draw();
+  setup();
 }
 
 function calculateMondrian(){
