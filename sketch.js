@@ -36,9 +36,6 @@ function draw() {
 
 
 function calculateRectangle() {
-  rectangles = []; // Array to store generated rectangles
-  smallRectangles = [];
-
   // Generate rectangles between adjacent horizontal lines, ensuring no overlap
   for (let i = 0; i < horizontalLines.length - 1 && rectangles.length < maxRectangles; i++) {
     // Determine boundaries for the rectangle
@@ -298,9 +295,6 @@ function generateSquares(){
   for (let horizontal of horizontalLines){ 
     for (let vertical of verticalLines){
       if(vertical.x < mondrian.width && horizontal.y < mondrian.height){ 
-        let randomColor = random([color(173,57,42),   //red
-                                  color(67,103,187),    //blue
-                                  color(200, 200, 200)]);  //grey
         squares.push({x:vertical.x,y:horizontal.y,noiseOffsetX:random(1000),noiseOffsetY: random(1000)});
       }
     }
@@ -320,10 +314,6 @@ function generateSquares(){
   for(let horizontal of horizontalLines){
     for (let i = rectSize; i < mondrian.width; i += rectSize){
       if(random() > 0.5){ //Randomly decide to place a colored square
-        let randomColor = random([color(238,216,34), //yellow
-                                    color(173,57,42), //red
-                                    color(67,103,187), //blue
-                                    color(200, 200, 200)]); //grey
         squares.push({x:i,y:horizontal.y,noiseOffsetX:random(1000),noiseOffsetY: random(1000)});
       }
     }
@@ -345,21 +335,12 @@ function drawSquares(){
     fill(lerpedColor);
     noStroke();
 
-    push();
-    translate(square.x + mondrian.xOffset, square.y + mondrian.yOffset);
-    rect(0,0,rectSize/2,rectSize/2);
-    pop();
+    rect(square.x + mondrian.xOffset, square.y + mondrian.yOffset, rectSize / 2, rectSize / 2);
   }
 }
 
 
 
-function windowResized(){
-  resizeCanvas(windowWidth, windowHeight);
-  background(255, 250, 240);
-  calculateMondrian(); 
-  setup();
-}
 function windowResized(){
   resizeCanvas(windowWidth, windowHeight);
   background(255, 250, 240);
