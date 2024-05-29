@@ -12,30 +12,32 @@ let canvasAspectRatio = 0;
 //Make two arrays to store the horizontal and vertical lines
 let horizontalLines = [];
 let verticalLines = [];
+let minRectangles = 10;
+let maxRectangles = 15;
 let squares=[];
+let rectangles = [];
+let smallRectangles = [];
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
   background(255, 250, 240); //Floralwhite
   calculateMondrian();
-  //noLoop(); //make the draw function only run once
   generateLine();
-
   generateSquares();
-  drawRectangle();
+  calculateRectangle();
 }
 
 function draw() {
   background(255);//Refresh the background color
   drawLine(); // draw line first
   drawSquares();
+  drawRectangles();
 }
 
 
-function drawRectangle() {
-  let rectangles = []; // Array to store generated rectangles
-  let minRectangles = 10; // Minimum number of rectangles
-  let maxRectangles = 15; // Maximum number of rectangles
+function calculateRectangle() {
+  rectangles = []; // Array to store generated rectangles
+  smallRectangles = [];
 
   // Generate rectangles between adjacent horizontal lines, ensuring no overlap
   for (let i = 0; i < horizontalLines.length - 1 && rectangles.length < maxRectangles; i++) {
@@ -74,53 +76,17 @@ function drawRectangle() {
     if (validPosition && h > 0) {
       // Draw the rectangle with a random color
       let randomColor = random([color(238,216,34), color(173,57,42), color(67,103,187), color(200)]);
-      fill(randomColor);
-      noStroke();
-      strokeWeight(1);
-      rect(x + mondrian.xOffset, y + mondrian.yOffset, w, h);
-      rectangles.push({x: x, y: y, w: w, h: h}); // Add the rectangle to the array
-      if((w>rectSize||h>rectSize)&&h>w){
-        let smallRectW = w;
-        let smallRectH = floor(random(h/4,h/2));
-        let smallX = x;
-        let smallY = y + floor(random(0, h - smallRectH));
-        let smallColor = random([color(238, 216, 34), color(173, 57, 42), color(67, 103, 187), color(200)]);
-        fill(smallColor);
-        noStroke();
-        rect(smallX + mondrian.xOffset, smallY + mondrian.yOffset, smallRectW, smallRectH);
-        //To generate a smaller rectangle in the middle of a larger rectangle
-        if(smallRectH>rectSize&&smallRectW>rectSize){
-          let centerRectW = smallRectW / 2;
-          let centerRectH = smallRectH / 2;
-          let centerX = smallX + (smallRectW - centerRectW) / 2;
-          let centerY = smallY + (smallRectH - centerRectH) / 2;
-          let centerColor = random([color(238, 216, 34),color(200)]);
-          fill(centerColor);
-          noStroke();
-          rect(centerX + mondrian.xOffset, centerY + mondrian.yOffset, centerRectW, centerRectH);
-        }
+      let isHorizontal;
+      if (h > w) {
+        isHorizontal = false; // Vertical movement
+      } else if (h < w) {
+        isHorizontal = true; // Horizontal movement
+      } else {
+        isHorizontal = random() > 0.5; // Random movement direction
       }
-      if((w>rectSize||h>rectSize)&&h<w){
-        let smallRectW = floor(random(w/4,w/2));
-        let smallRectH = h;
-        let smallX = x + floor(random(0, w - smallRectW));
-        let smallY = y;
-        let smallColor = random([color(238, 216, 34), color(173, 57, 42), color(67, 103, 187), color(200)]);
-        fill(smallColor);
-        noStroke();
-        rect(smallX + mondrian.xOffset, smallY + mondrian.yOffset, smallRectW, smallRectH);
-        //To generate a smaller rectangle in the middle of a larger rectangle
-        if(smallRectH>rectSize&&smallRectW>rectSize){
-          let centerRectW = smallRectW / 2;
-          let centerRectH = smallRectH / 2;
-          let centerX = smallX + (smallRectW - centerRectW) / 2;
-          let centerY = smallY + (smallRectH - centerRectH) / 2;
-          let centerColor = random([color(238, 216, 34),color(200)]);
-          fill(centerColor);
-          noStroke();
-          rect(centerX + mondrian.xOffset, centerY + mondrian.yOffset, centerRectW, centerRectH);
-        }
-      }
+      let noiseOffset = random(1000);
+      rectangles.push({x: x, y: y, w: w, h: h, color: randomColor, isHorizontal: isHorizontal, noiseOffset: noiseOffset, speed: random(0.5, 1.5)});
+      calculateSmallRectangles(x, y, w, h, isHorizontal, noiseOffset);
     }
   }
 
@@ -160,54 +126,18 @@ function drawRectangle() {
     // Draw the rectangle if a valid position is found
     if (validPosition && w > 0) {
       // Draw the rectangle with a random color
-      let randomColor = random([color(238,216,34), color(173,57,42), color(67,103,187), color(200)]);
-      fill(randomColor);
-      noStroke();
-      strokeWeight(1);
-      rect(x + mondrian.xOffset, y + mondrian.yOffset, w, h);
-      rectangles.push({x: x, y: y, w: w, h: h}); // Add the rectangle to the array
-      if((w>rectSize||h>rectSize)&&h>w){
-        let smallRectW = w;
-        let smallRectH = floor(random(h/4,h/2));
-        let smallX = x;
-        let smallY = y + floor(random(0, h - smallRectH));
-        let smallColor = random([color(238, 216, 34), color(173, 57, 42), color(67, 103, 187), color(200)]);
-        fill(smallColor);
-        noStroke();
-        rect(smallX + mondrian.xOffset, smallY + mondrian.yOffset, smallRectW, smallRectH);
-        //To generate a smaller rectangle in the middle of a larger rectangle
-        if(smallRectH>=rectSize&&smallRectW>=rectSize){
-          let centerRectW = smallRectW / 2;
-          let centerRectH = smallRectH / 2;
-          let centerX = smallX + (smallRectW - centerRectW) / 2;
-          let centerY = smallY + (smallRectH - centerRectH) / 2;
-          let centerColor = random([color(238, 216, 34),color(200)]);
-          fill(centerColor);
-          noStroke();
-          rect(centerX + mondrian.xOffset, centerY + mondrian.yOffset, centerRectW, centerRectH);
-        }
+      let randomColor = random([color(238, 216, 34), color(173, 57, 42), color(67, 103, 187), color(200)]);
+      let isHorizontal;
+      if (h > w) {
+        isHorizontal = false; // Vertical movement
+      } else if (h < w) {
+        isHorizontal = true; // Horizontal movement
+      } else {
+        isHorizontal = random() > 0.5; // Random movement direction
       }
-      if((w>rectSize||h>rectSize)&&h<w){
-        let smallRectW = floor(random(w/4,w/2));
-        let smallRectH = h;
-        let smallX = x + floor(random(0, w - smallRectW));
-        let smallY = y;
-        let smallColor = random([color(238, 216, 34), color(173, 57, 42), color(67, 103, 187), color(200)]);
-        fill(smallColor);
-        noStroke();
-        rect(smallX + mondrian.xOffset, smallY + mondrian.yOffset, smallRectW, smallRectH);
-        //To generate a smaller rectangle in the middle of a larger rectangle
-        if(smallRectH>=rectSize&&smallRectW>=rectSize){
-          let centerRectW = smallRectW / 2;
-          let centerRectH = smallRectH / 2;
-          let centerX = smallX + (smallRectW - centerRectW) / 2;
-          let centerY = smallY + (smallRectH - centerRectH) / 2;
-          let centerColor = random([color(238, 216, 34),color(200)]);
-          fill(centerColor);
-          noStroke();
-          rect(centerX + mondrian.xOffset, centerY + mondrian.yOffset, centerRectW, centerRectH);
-        }
-      }
+      let noiseOffset = random(1000);
+      rectangles.push({x: x, y: y, w: w, h: h, color: randomColor, isHorizontal: isHorizontal, noiseOffset: noiseOffset, speed: random(0.5, 1.5)});
+      calculateSmallRectangles(x, y, w, h, isHorizontal, noiseOffset);
     }
   }
 
@@ -230,16 +160,90 @@ function drawRectangle() {
     // Draw the rectangle if a valid position is found
     if (validPosition) {
       // Draw the rectangle with a random color
-      let randomColor = random([color(238,216,34), color(173,57,42), color(67,103,187), color(200)]);
-      fill(randomColor);
-      noStroke();
-      strokeWeight(1);
-      rect(xMin + mondrian.xOffset, yMin + mondrian.yOffset, w, h);
-      rectangles.push({x: xMin, y: yMin, w: w, h: h}); // Add the rectangle to the array
+      let randomColor = random([color(238, 216, 34), color(173, 57, 42), color(67, 103, 187), color(200)]);
+      let isHorizontal = random() > 0.5; // Random movement direction for equal width and height
+      let noiseOffset = random(1000);
+      rectangles.push({x: xMin, y: yMin, w: w, h: h, color: randomColor, isHorizontal: isHorizontal, noiseOffset: noiseOffset, speed: random(0.5, 1.5)});
+      calculateSmallRectangles(xMin, yMin, w, h, isHorizontal, noiseOffset);
+    }
+  }
+}
+function calculateSmallRectangles(x, y, w, h, isHorizontal, noiseOffset) {
+  if ((w > rectSize || h > rectSize) && h > w) {
+    let smallRectW = w;
+    let smallRectH = floor(random(h / 4, h / 2));
+    let smallX = x;
+    let smallY = y + floor(random(0, h - smallRectH));
+    let smallColor = random([color(238, 216, 34), color(173, 57, 42), color(67, 103, 187), color(200)]);
+    smallRectangles.push({x: smallX, y: smallY, w: smallRectW, h: smallRectH, color: smallColor, isHorizontal: isHorizontal, parentIndex: rectangles.length - 1});
+
+    if (smallRectH > rectSize && smallRectW > rectSize) {
+      let centerRectW = smallRectW / 2;
+      let centerRectH = smallRectH / 2;
+      let centerX = smallX + (smallRectW - centerRectW) / 2;
+      let centerY = smallY + (smallRectH - centerRectH) / 2;
+      let centerColor = random([color(238, 216, 34), color(200)]);
+      smallRectangles.push({x: centerX, y: centerY, w: centerRectW, h: centerRectH, color: centerColor, isHorizontal: isHorizontal, parentIndex: rectangles.length - 1});
+    }
+  }
+
+  if ((w > rectSize || h > rectSize) && h < w) {
+    let smallRectW = floor(random(w / 4, w / 2));
+    let smallRectH = h;
+    let smallX = x + floor(random(0, w - smallRectW));
+    let smallY = y;
+    let smallColor = random([color(238, 216, 34), color(173, 57, 42), color(67, 103, 187), color(200)]);
+    smallRectangles.push({x: smallX, y: smallY, w: smallRectW, h: smallRectH, color: smallColor, isHorizontal: isHorizontal, parentIndex: rectangles.length - 1});
+
+    if (smallRectH > rectSize && smallRectW > rectSize) {
+      let centerRectW = smallRectW / 2;
+      let centerRectH = smallRectH / 2;
+      let centerX = smallX + (smallRectW - centerRectW) / 2;
+      let centerY = smallY + (smallRectH - centerRectH) / 2;
+      let centerColor = random([color(238, 216, 34), color(200)]);
+      smallRectangles.push({x: centerX, y: centerY, w: centerRectW, h: centerRectH, color: centerColor, isHorizontal: isHorizontal, parentIndex: rectangles.length - 1});
     }
   }
 }
 
+function drawRectangles() {
+  for (let rectangle of rectangles) {
+    fill(rectangle.color);
+    noStroke();
+    strokeWeight(1);
+
+    let directionOffset = rectangle.isHorizontal ? 1 : -1; // Direction bias
+
+    if (rectangle.isHorizontal) {
+      rectangle.x += directionOffset * rectangle.speed; // Move horizontally
+      if (rectangle.x > width) rectangle.x = 0; // Wrap around the canvas
+      if (rectangle.x < 0) rectangle.x = width; // Wrap around the canvas
+    } else {
+      rectangle.y += directionOffset * rectangle.speed; // Move vertically
+      if (rectangle.y > height) rectangle.y = 0; // Wrap around the canvas
+      if (rectangle.y < 0) rectangle.y = height; // Wrap around the canvas
+    }
+
+    rect(rectangle.x + mondrian.xOffset, rectangle.y + mondrian.yOffset, rectangle.w, rectangle.h);
+
+    // Move and draw small rectangles within the moving rectangle
+    for (let smallRect of smallRectangles) {
+      if (smallRect.parentIndex === rectangles.indexOf(rectangle)) {
+        if (rectangle.isHorizontal) {
+          smallRect.x += directionOffset * rectangle.speed;
+          if (smallRect.x > width) smallRect.x = 0;
+          if (smallRect.x < 0) smallRect.x = width;
+        } else {
+          smallRect.y += directionOffset * rectangle.speed;
+          if (smallRect.y > height) smallRect.y = 0;
+          if (smallRect.y < 0) smallRect.y = height;
+        }
+        fill(smallRect.color);
+        rect(smallRect.x + mondrian.xOffset, smallRect.y + mondrian.yOffset, smallRect.w, smallRect.h);
+      }
+    }
+  }
+}
 function generateLine(){
    //Make two arrays to store the horizontal and vertical lines
    horizontalLines = [];
@@ -293,12 +297,11 @@ function generateSquares(){
   //intersection of the horizontal and vertical lines
   for (let horizontal of horizontalLines){ 
     for (let vertical of verticalLines){
-      //
       if(vertical.x < mondrian.width && horizontal.y < mondrian.height){ 
         let randomColor = random([color(173,57,42),   //red
                                   color(67,103,187),    //blue
                                   color(200, 200, 200)]);  //grey
-        squares.push({x:vertical.x,y:horizontal.y,color:randomColor,noiseOffsetX:random(1000),noiseOffsetY: random(1000)});
+        squares.push({x:vertical.x,y:horizontal.y,noiseOffsetX:random(1000),noiseOffsetY: random(1000)});
       }
     }
   }
@@ -307,11 +310,7 @@ function generateSquares(){
   for(let vertical of verticalLines){
     for (let i = rectSize; i < mondrian.height; i += rectSize){
       if(random() > 0.5){
-        let randomColor = random([color(238,216,34), //yellow
-                                  color(173,57,42), //red
-                                  color(67,103,187), //blue
-                                  color(200, 200, 200)]); //grey
-        squares.push({x:vertical.x,y:i.y,color:randomColor,noiseOffsetX:random(1000),noiseOffsetY: random(1000)});
+        squares.push({x:vertical.x,y:i,noiseOffsetX:random(1000),noiseOffsetY: random(1000)});
       }
     }
   }
@@ -325,7 +324,7 @@ function generateSquares(){
                                     color(173,57,42), //red
                                     color(67,103,187), //blue
                                     color(200, 200, 200)]); //grey
-        squares.push({x:i,y:horizontal.y,color:randomColor,noiseOffsetX:random(1000),noiseOffsetY: random(1000)});
+        squares.push({x:i,y:horizontal.y,noiseOffsetX:random(1000),noiseOffsetY: random(1000)});
       }
     }
   }
@@ -333,18 +332,23 @@ function generateSquares(){
 function drawSquares(){
   //draw small squares
   for(let square of squares){
-    fill(square.color);
+    //perlin noise
+    let noiseVal = noise(square.noiseOffsetX + frameCount * 0.01);
+    let lerpedColor;
+    if (noiseVal < 0.33) {
+      lerpedColor = lerpColor(color(238, 216, 34), color(173, 57, 42), noiseVal / 0.33); // Yellow to red
+    } else if (noiseVal < 0.66) {
+      lerpedColor = lerpColor(color(173, 57, 42), color(200, 200, 200), (noiseVal - 0.33) / 0.33); // Red to grey
+    } else {
+      lerpedColor = lerpColor(color(200, 200, 200), color(67, 103, 187), (noiseVal - 0.66) / 0.34); // Grey to blue
+    }
+    fill(lerpedColor);
     noStroke();
 
-    let noiseX=noise(square.noiseOffsetX+frameCount*0.01)*30-15;
-    let noiseY=noise(square.noiseOffsetY+frameCount*0.01)*30-15;
-
     push();
-    translate(square.x+mondrian.xOffset+noiseX,square.y+mondrian.yOffset+noiseY);
+    translate(square.x + mondrian.xOffset, square.y + mondrian.yOffset);
     rect(0,0,rectSize/2,rectSize/2);
     pop();
-    //let animatedY = square.y+sin(frameCount * 0.1)*2;
-    //rect(square.x+mondrian.xOffset,animatedY+mondrian.yOffset,rectSize/2);
   }
 }
 
