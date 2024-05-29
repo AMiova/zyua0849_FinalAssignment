@@ -343,9 +343,8 @@ function drawSquares(){
 
 function windowResized(){
   resizeCanvas(windowWidth, windowHeight);
-  background(255, 250, 240);
   calculateMondrian(); 
-  setup();
+  background(255, 250, 240);
 }
 
 function calculateMondrian(){
@@ -362,7 +361,7 @@ function calculateMondrian(){
     mondrian.height = height;
     mondrian.xOffset = (width - mondrian.width) / 2;
     mondrian.yOffset = 0;
-  } else if (1 == canvasAspectRatio){
+  } else{
     mondrian.width = width;
     mondrian.height = height;
     mondrian.xOffset = 0;
