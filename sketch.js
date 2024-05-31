@@ -100,7 +100,8 @@ function calculateRectangle() {
     let attempts = 0;
     let validPosition = false;
     let x, y, w;
-    while (!validPosition && attempts < 1000) { 
+    while (!validPosition && attempts < 1000) {
+      //The floor method is a mathematical function used for rounding down. It rounds a number down to the nearest integer.
       x = floor(random(mondrian.width / rectSize)) * rectSize;
       w = rectSize; // Keep rectangle width constant
 
@@ -352,6 +353,7 @@ function drawSquares(){
     let noiseVal = noise(square.noiseOffsetX + frameCount * 0.01);
     let lerpedColor;
     if (noiseVal < 0.33) {
+      //The lerpColor method generates a transition color by blending two colors based on a noise value, and it is used to create gradient effects.
       lerpedColor = lerpColor(color(238, 216, 34), color(173, 57, 42), noiseVal / 0.33); // Yellow to red
     } else if (noiseVal < 0.66) {
       lerpedColor = lerpColor(color(173, 57, 42), color(200, 200, 200), (noiseVal - 0.33) / 0.33); // Red to grey
