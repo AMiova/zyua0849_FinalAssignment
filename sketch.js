@@ -18,6 +18,59 @@ let squares=[];
 let rectangles = [];
 let smallRectangles = [];
 
+class Rectangle {
+  constructor(x,y,w,h,color,isHorizontal,noiseOffset,speed) {
+    this.x=x;
+    this.y=y;
+    this.w=w;
+    this.h=h;
+    this.color=color;
+    this.isHorizontal=isHorizontal;
+    this.noiseOffset=noiseOffset;
+    this.speed=speed;
+    this.smallRectangles=[]; // 用于存储小矩形
+  }
+
+  moveAndDraw() {
+    fill(this.color);
+    noStroke();
+    strokeWeight(1);
+
+    let directionOffset=this.isHorizontal?1:-1; // 方向偏移
+
+    if(this.isHorizontal) {
+      this.x+=directionOffset*this.speed; // 水平移动
+      if(this.x>width)this.x=0; // 画布环绕
+      if(this.x<0)this.x=width; // 画布环绕
+    } else {
+      this.y+=directionOffset*this.speed; // 垂直移动
+      if(this.y>height)this.y=0; // 画布环绕
+      if(this.y<0)this.y=height; // 画布环绕
+    }
+
+    rect(this.x+mondrian.xOffset,this.y+mondrian.yOffset,this.w,this.h);
+
+    // 移动并绘制小矩形
+    for(let smallRect of this.smallRectangles) {
+      if(this.isHorizontal) {
+        smallRect.x+=directionOffset*this.speed;
+        if(smallRect.x>width)smallRect.x=0;
+        if(smallRect.x<0)smallRect.x=width;
+      } else {
+        smallRect.y+=directionOffset*this.speed;
+        if(smallRect.y>height)smallRect.y=0;
+        if(smallRect.y<0)smallRect.y=height;
+      }
+      fill(smallRect.color);
+      rect(smallRect.x+mondrian.xOffset,smallRect.y+mondrian.yOffset,smallRect.w,smallRect.h);
+    }
+  }
+
+  addSmallRectangle(smallRect) {
+    this.smallRectangles.push(smallRect);
+  }
+}
+
 function setup() {
   createCanvas(windowWidth, windowHeight);
   background(255, 250, 240); //Floralwhite
@@ -82,8 +135,10 @@ function calculateRectangle() {
         isHorizontal = random() > 0.5; // Random movement direction
       }
       let noiseOffset = random(1000);
-      rectangles.push({x: x, y: y, w: w, h: h, color: randomColor, isHorizontal: isHorizontal, noiseOffset: noiseOffset, speed: random(0.5, 1.5)});
-      calculateSmallRectangles(x, y, w, h, isHorizontal, noiseOffset);
+      let speed=random(0.5,1.5);
+      let rectangle=new Rectangle(x,y,w,h,randomColor,isHorizontal,noiseOffset,speed);
+      rectangles.push(rectangle);
+      calculateSmallRectangles(rectangle,x, y, w, h, isHorizontal, noiseOffset);
     }
   }
 
@@ -133,8 +188,10 @@ function calculateRectangle() {
         isHorizontal = random() > 0.5; // Random movement direction
       }
       let noiseOffset = random(1000);
-      rectangles.push({x: x, y: y, w: w, h: h, color: randomColor, isHorizontal: isHorizontal, noiseOffset: noiseOffset, speed: random(0.5, 1.5)});
-      calculateSmallRectangles(x, y, w, h, isHorizontal, noiseOffset);
+      let speed=random(0.5,1.5);
+      let rectangle=new Rectangle(x,y,w,h,randomColor,isHorizontal,noiseOffset,speed);
+      rectangles.push(rectangle);
+      calculateSmallRectangles(rectangle,x, y, w, h, isHorizontal, noiseOffset);
     }
   }
 
@@ -160,19 +217,21 @@ function calculateRectangle() {
       let randomColor = random([color(238, 216, 34), color(173, 57, 42), color(67, 103, 187), color(200)]);
       let isHorizontal = random() > 0.5; // Random movement direction for equal width and height
       let noiseOffset = random(1000);
-      rectangles.push({x: xMin, y: yMin, w: w, h: h, color: randomColor, isHorizontal: isHorizontal, noiseOffset: noiseOffset, speed: random(0.5, 1.5)});
-      calculateSmallRectangles(xMin, yMin, w, h, isHorizontal, noiseOffset);
+      let speed=random(0.5,1.5);
+      let rectangle=new Rectangle(xMin,yMin,w,h,randomColor,isHorizontal,noiseOffset,speed);
+      rectangles.push(rectangle);
+      calculateSmallRectangles(rectangle,xMin, yMin, w, h, isHorizontal, noiseOffset);
     }
   }
 }
-function calculateSmallRectangles(x, y, w, h, isHorizontal, noiseOffset) {
+function calculateSmallRectangles(rectangle,x, y, w, h, isHorizontal) {
   if ((w > rectSize || h > rectSize) && h > w) {
     let smallRectW = w;
     let smallRectH = floor(random(h / 4, h / 2));
     let smallX = x;
     let smallY = y + floor(random(0, h - smallRectH));
     let smallColor = random([color(238, 216, 34), color(173, 57, 42), color(67, 103, 187), color(200)]);
-    smallRectangles.push({x: smallX, y: smallY, w: smallRectW, h: smallRectH, color: smallColor, isHorizontal: isHorizontal, parentIndex: rectangles.length - 1});
+    rectangle.addSmallRectangle({x: smallX, y: smallY, w: smallRectW, h: smallRectH, color: smallColor, isHorizontal: isHorizontal, parentIndex: rectangles.length - 1});
 
     if (smallRectH > rectSize && smallRectW > rectSize) {
       let centerRectW = smallRectW / 2;
@@ -180,7 +239,7 @@ function calculateSmallRectangles(x, y, w, h, isHorizontal, noiseOffset) {
       let centerX = smallX + (smallRectW - centerRectW) / 2;
       let centerY = smallY + (smallRectH - centerRectH) / 2;
       let centerColor = random([color(238, 216, 34), color(200)]);
-      smallRectangles.push({x: centerX, y: centerY, w: centerRectW, h: centerRectH, color: centerColor, isHorizontal: isHorizontal, parentIndex: rectangles.length - 1});
+      rectangle.addSmallRectangle({x: centerX, y: centerY, w: centerRectW, h: centerRectH, color: centerColor, isHorizontal: isHorizontal, parentIndex: rectangles.length - 1});
     }
   }
 
@@ -190,7 +249,7 @@ function calculateSmallRectangles(x, y, w, h, isHorizontal, noiseOffset) {
     let smallX = x + floor(random(0, w - smallRectW));
     let smallY = y;
     let smallColor = random([color(238, 216, 34), color(173, 57, 42), color(67, 103, 187), color(200)]);
-    smallRectangles.push({x: smallX, y: smallY, w: smallRectW, h: smallRectH, color: smallColor, isHorizontal: isHorizontal, parentIndex: rectangles.length - 1});
+    rectangle.addSmallRectangle({x: smallX, y: smallY, w: smallRectW, h: smallRectH, color: smallColor, isHorizontal: isHorizontal, parentIndex: rectangles.length - 1});
 
     if (smallRectH > rectSize && smallRectW > rectSize) {
       let centerRectW = smallRectW / 2;
@@ -198,47 +257,14 @@ function calculateSmallRectangles(x, y, w, h, isHorizontal, noiseOffset) {
       let centerX = smallX + (smallRectW - centerRectW) / 2;
       let centerY = smallY + (smallRectH - centerRectH) / 2;
       let centerColor = random([color(238, 216, 34), color(200)]);
-      smallRectangles.push({x: centerX, y: centerY, w: centerRectW, h: centerRectH, color: centerColor, isHorizontal: isHorizontal, parentIndex: rectangles.length - 1});
+      rectangle.addSmallRectangle({x: centerX, y: centerY, w: centerRectW, h: centerRectH, color: centerColor, isHorizontal: isHorizontal, parentIndex: rectangles.length - 1});
     }
   }
 }
 
 function drawRectangles() {
   for (let rectangle of rectangles) {
-    fill(rectangle.color);
-    noStroke();
-    strokeWeight(1);
-
-    let directionOffset = rectangle.isHorizontal ? 1 : -1; // Direction bias
-
-    if (rectangle.isHorizontal) {
-      rectangle.x += directionOffset * rectangle.speed; // Move horizontally
-      if (rectangle.x > width) rectangle.x = 0; // Wrap around the canvas
-      if (rectangle.x < 0) rectangle.x = width; // Wrap around the canvas
-    } else {
-      rectangle.y += directionOffset * rectangle.speed; // Move vertically
-      if (rectangle.y > height) rectangle.y = 0; // Wrap around the canvas
-      if (rectangle.y < 0) rectangle.y = height; // Wrap around the canvas
-    }
-
-    rect(rectangle.x + mondrian.xOffset, rectangle.y + mondrian.yOffset, rectangle.w, rectangle.h);
-
-    // Move and draw small rectangles within the moving rectangle
-    for (let smallRect of smallRectangles) {
-      if (smallRect.parentIndex === rectangles.indexOf(rectangle)) {
-        if (rectangle.isHorizontal) {
-          smallRect.x += directionOffset * rectangle.speed;
-          if (smallRect.x > width) smallRect.x = 0;
-          if (smallRect.x < 0) smallRect.x = width;
-        } else {
-          smallRect.y += directionOffset * rectangle.speed;
-          if (smallRect.y > height) smallRect.y = 0;
-          if (smallRect.y < 0) smallRect.y = height;
-        }
-        fill(smallRect.color);
-        rect(smallRect.x + mondrian.xOffset, smallRect.y + mondrian.yOffset, smallRect.w, smallRect.h);
-      }
-    }
+   rectangle.moveAndDraw();
   }
 }
 function generateLine(){
